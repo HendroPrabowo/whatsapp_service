@@ -19,8 +19,8 @@ Perfect for personal automations, bots, or integrations with your existing syste
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/whatsapp-api.git
-   cd whatsapp-api
+   git clone https://github.com/HendroPrabowo/whatsapp_service.git
+   cd whatsapp_service
    ```
 
 2. Install dependencies:
