@@ -4,7 +4,7 @@ async function sendMessage(req, res) {
     const {number, message} = req.body;
 
     if (!number || !message) {
-        return res.status(400).json({success: false, message: 'Parameter number dan message wajib diisi'});
+        return res.status(400).json({success: false, message: 'Parameter number and message cannot empty'});
     }
 
     const result = await sendMessageToNumber(number, message);

@@ -5,9 +5,14 @@ async function sendMessageToNumber(number, message) {
 
     try {
         await client.sendMessage(chatId, message);
-        return { success: true, message: `Pesan berhasil dikirim ke ${number}` };
+        return { success: true, message: `success send to ${number}` };
     } catch (error) {
-        return { success: false, message: `Gagal mengirim pesan ke ${number}`, error };
+        console.error('An error occurred:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+        });
+        return { success: false, message: `failed send to ${number}`, error };
     }
 }
 

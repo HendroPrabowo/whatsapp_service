@@ -106,5 +106,3 @@ whatsapp_service
 
 ## 📃 License
 This project is licensed under the MIT License.
-
-tree --prune -I '.idea|.wwebjs_cache|node_modules'
