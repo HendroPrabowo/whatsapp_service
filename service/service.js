@@ -1,4 +1,5 @@
 const client = require('../config/config');
+const logger = require('./config/logger');
 
 async function sendMessageToNumber(number, message) {
     const chatId = number + '@c.us';
@@ -7,11 +8,7 @@ async function sendMessageToNumber(number, message) {
         await client.sendMessage(chatId, message);
         return { success: true, message: `success send to ${number}` };
     } catch (error) {
-        console.error('An error occurred:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
-        });
+        logger.error({ err: error }, 'something went wrong');
         return { success: false, message: `failed send to ${number}`, error };
     }
 }
