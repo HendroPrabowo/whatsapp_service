@@ -1,5 +1,5 @@
 const client = require('../config/config');
-const logger = require('./config/logger');
+const logger = require('../config/logger');
 
 async function sendMessageToNumber(number, message) {
     const chatId = number + '@c.us';
