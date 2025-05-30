@@ -1,11 +1,11 @@
-const client = require('../config/config');
+const whatsapp_client = require('../config/whatsapp_client');
 const logger = require('../config/logger');
 
 async function sendMessageToNumber(number, message) {
     const chatId = number + '@c.us';
 
     try {
-        await client.sendMessage(chatId, message);
+        await whatsapp_client.sendMessage(chatId, message);
         return { success: true, message: `success send to ${number}` };
     } catch (error) {
         logger.error({ err: error }, 'something went wrong');

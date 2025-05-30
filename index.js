@@ -1,10 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const messageRoutes = require('./route/route');
 const logger = require('./config/logger');
+const config = require('./config/config');
 
 const app = express();
-const port = 3000;
+const PORT = config.port;
+const NODE_ENV = config.env;
+
+// Enable All CORS Requests
+app.use(cors());
 
 // Middleware
 app.use(bodyParser.json());
@@ -13,6 +20,6 @@ app.use(bodyParser.json());
 app.use('/', messageRoutes);
 
 // Start server
-app.listen(port, () => {
-    logger.info(`App start in http://localhost:${port}`);
+app.listen(PORT, () => {
+    logger.info(`app start in http://localhost:${PORT} in ${NODE_ENV} environment`);
 });
