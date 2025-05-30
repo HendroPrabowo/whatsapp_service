@@ -1,4 +1,4 @@
-const {sendMessageToNumber} = require('../service/service');
+const {sendMessageToNumber} = require('../service/whatsapp_service');
 
 async function sendMessage(req, res) {
     const {number, message} = req.body;
