@@ -5,6 +5,8 @@ const cors = require('cors');
 const messageRoutes = require('./route/route');
 const logger = require('./config/logger');
 const config = require('./config/config');
+const { initDb } = require('./config/sequelize');
+const Message = require('./model/message');
 
 const app = express();
 const PORT = config.port;
@@ -19,7 +21,18 @@ app.use(bodyParser.json());
 // Routing
 app.use('/', messageRoutes);
 
-// Start server
-app.listen(PORT, () => {
-    logger.info(`app start in http://localhost:${PORT} in ${NODE_ENV} environment`);
-});
+async function startServer() {
+  try {
+    // init sqlite
+    await initDb();
+
+    app.listen(PORT, () => {
+      logger.info(`app started at http://localhost:${PORT} in ${NODE_ENV} environment`);
+    });
+  } catch (error) {
+    logger.error(error, 'failed to start server due to DB error');
+    process.exit(1);
+  }
+}
+
+startServer();

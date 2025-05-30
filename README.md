@@ -60,7 +60,7 @@ Send a WhatsApp message to a specific number.
 curl --location 'http://localhost:3000/send-message' \
 --header 'Content-Type: application/json' \
 --data '{
-    "number": "6285155466299",
+    "number": "628xxxxxxxxx",
     "message": "Hello from API!"
 }'
 ```
@@ -81,6 +81,7 @@ curl --location 'http://localhost:3000/send-message' \
 - [Express.js](https://expressjs.com/)
 - [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)
 - [qrcode-terminal](https://www.npmjs.com/package/qrcode-terminal)
+- [sqllite](https://www.sqlite.org/)
 
 ---
 
@@ -89,17 +90,26 @@ curl --location 'http://localhost:3000/send-message' \
 ```
 whatsapp_service
 ├── config
-│   └── config.js
+│   ├── config.js
+│   ├── logger.js
+│   ├── sequelize.js
+│   └── whatsapp_client.js
 ├── controller
 │   └── controller.js
+├── index.js
+├── model
+│   └── message.js
+├── package.json
+├── package-lock.json
+├── README.md
+├── repository
+│   └── message.js
 ├── route
 │   └── route.js
 ├── service
-│   └── service.js
-├── index.js
-├── package.json
-├── package-lock.json
-└── README.md
+│   └── whatsapp_service.js
+└── sqlite
+    └── db.sqlite
 ```
 
 ---
