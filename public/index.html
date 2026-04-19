@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Message</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+            <h4 class="text-center mb-3">📩 Schedule Message</h4>
+
+            <form id="messageForm">
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="number" class="form-control" placeholder="0812xxxxxxx" required inputmode="numeric">
+                    <div class="invalid-feedback">Invalid phone number</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea id="message" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Send Time</label>
+                    <input type="datetime-local" id="send_time" class="form-control" required>
+                </div>
+
+                <button id="submitBtn" type="submit" class="btn btn-success w-100">
+                    <span id="btnText">Submit</span>
+                    <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toast" class="toast align-items-center text-white border-0">
+        <div class="d-flex">
+            <div id="toastMessage" class="toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const form = document.getElementById("messageForm");
+const btn = document.getElementById("submitBtn");
+const btnText = document.getElementById("btnText");
+const spinner = document.getElementById("loadingSpinner");
+const phoneInput = document.getElementById("number");
+const dateInput = document.getElementById("send_time");
+
+// ✅ Set minimum datetime = NOW
+function setMinDateTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // fix timezone
+
+    const min = now.toISOString().slice(0,16);
+    dateInput.min = min;
+}
+setMinDateTime();
+
+// ✅ Allow numbers only (typing + paste)
+phoneInput.addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9]/g, "");
+});
+
+// toast
+function showToast(message, success = true) {
+    const toastEl = document.getElementById("toast");
+    const toastMsg = document.getElementById("toastMessage");
+
+    toastMsg.innerText = message;
+    toastEl.classList.remove("bg-success", "bg-danger");
+    toastEl.classList.add(success ? "bg-success" : "bg-danger");
+
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+
+// validation
+function validatePhone(number) {
+    return /^08[0-9]{8,12}$/.test(number);
+}
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const message = document.getElementById("message").value;
+    let sendTime = dateInput.value;
+
+    if (!validatePhone(phoneInput.value)) {
+        phoneInput.classList.add("is-invalid");
+        return;
+    } else {
+        phoneInput.classList.remove("is-invalid");
+    }
+
+    sendTime = sendTime.replace("T", " ") + ":00";
+
+    btn.disabled = true;
+    spinner.classList.remove("d-none");
+    btnText.innerText = "Sending...";
+
+    try {
+        const res = await fetch("/send-message/scheduled", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                number: phoneInput.value,
+                message: message,
+                send_time: sendTime
+            })
+        });
+
+        if (res.ok) {
+            showToast("✅ Message scheduled successfully!", true);
+            form.reset();
+            setMinDateTime(); // reset min again
+        } else {
+            const err = await res.text();
+            showToast("❌ Failed: " + err, false);
+        }
+
+    } catch (err) {
+        showToast("❌ Error: " + err.message, false);
+    } finally {
+        btn.disabled = false;
+        spinner.classList.add("d-none");
+        btnText.innerText = "Submit";
+    }
+});
+</script>
+
+</body>
+</html>

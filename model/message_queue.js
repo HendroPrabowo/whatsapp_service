@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/sequelize');
 
 // Define a model
-const Message = sequelize.define('message', {
+const MessageQueue = sequelize.define('message_queue', {
     number: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -10,7 +10,15 @@ const Message = sequelize.define('message', {
     message: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    send_time: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
+    is_sent: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
     }
 });
 
-module.exports = Message;
+module.exports = MessageQueue;
