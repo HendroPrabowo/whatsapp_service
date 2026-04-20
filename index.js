@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path'); // ✅ add this
 
 const messageRoutes = require('./route/route');
 const logger = require('./config/logger');
@@ -18,8 +19,16 @@ app.use(cors());
 // Middleware
 app.use(bodyParser.json());
 
-// Routing
+// ✅ Serve static files (IMPORTANT)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Routing (API)
 app.use('/', messageRoutes);
+
+// ✅ Optional: force index.html on root (safe fallback)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 async function startServer() {
   try {
@@ -35,4 +44,5 @@ async function startServer() {
   }
 }
 
+require('./scheduler/scheduler');
 startServer();

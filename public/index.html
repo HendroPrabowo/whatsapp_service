@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Scheduled Message · Messenger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9eef3 0%, #dce3ec 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, 'Noto Sans', sans-serif;
+            padding: 24px 18px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* main card container */
+        .schedule-card {
+            max-width: 520px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(0px);
+            border-radius: 44px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header */
+        .form-header {
+            background: #ffffff;
+            padding: 28px 24px 12px 24px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .form-header h1 {
+            font-size: 1.85rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1e2b3c, #2c4b66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 0.9rem;
+            color: #5e6f8d;
+            margin-top: 6px;
+        }
+
+        /* form body */
+        .form-body {
+            padding: 20px 24px 28px 24px;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 550;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #1f2a44;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required-star {
+            color: #e53e3e;
+            font-size: 1.1rem;
+            margin-left: 2px;
+        }
+
+        input, textarea {
+            font-family: inherit;
+            font-size: 1rem;
+            padding: 14px 16px;
+            border-radius: 28px;
+            border: 1.5px solid #e2e8f0;
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+            outline: none;
+            width: 100%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        textarea {
+            border-radius: 28px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        /* datetime-local custom style (mobile friendly) */
+        input[type="datetime-local"] {
+            font-family: monospace;
+            letter-spacing: 0.3px;
+            color: #0a2540;
+        }
+
+        /* error message style */
+        .error-message {
+            font-size: 0.75rem;
+            color: #dc2626;
+            margin-top: 6px;
+            margin-left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .error-border {
+            border-color: #f87171 !important;
+            background-color: #fff8f8;
+        }
+
+        /* button */
+        .btn-submit {
+            background: #1e3a5f;
+            color: white;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 15px 0;
+            border: none;
+            border-radius: 48px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-top: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 6px 14px rgba(0, 20, 40, 0.2);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.97);
+            background: #0f2a42;
+        }
+
+        .btn-submit:disabled {
+            background: #9aaebf;
+            transform: none;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* loading spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* toast / status message */
+        .status-message {
+            margin-top: 18px;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            word-break: break-word;
+        }
+
+        .status-success {
+            background: #e0f2e9;
+            color: #0a5b3a;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .status-error {
+            background: #fee9e6;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        .status-info {
+            background: #eef2ff;
+            color: #1e40af;
+        }
+
+        hr {
+            margin: 12px 0 0 0;
+            border: none;
+            border-top: 1px solid #edf2f7;
+        }
+
+        /* subtle note */
+        .note {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #6b7b9b;
+            margin-top: 18px;
+        }
+
+        /* mobile optimization */
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 14px;
+            }
+            .form-body {
+                padding: 16px 20px 24px 20px;
+            }
+            .form-header {
+                padding: 22px 20px 8px 20px;
+            }
+            .btn-submit {
+                padding: 14px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="schedule-card">
+    <div class="form-header">
+        <h1>📅 Schedule Message</h1>
+        <p>Set date & time — we'll deliver exactly when you want</p>
+    </div>
+    <div class="form-body">
+        <form id="scheduleForm" novalidate>
+            <!-- Phone Number -->
+            <div class="input-group" id="phoneGroup">
+                <label>📞 Phone Number <span class="required-star">*</span></label>
+                <input type="tel" id="phone" placeholder="e.g., 1234567890" inputmode="numeric" autocomplete="off">
+                <div class="error-message" id="phoneError"></div>
+            </div>
+
+            <!-- Message -->
+            <div class="input-group" id="messageGroup">
+                <label>💬 Message <span class="required-star">*</span></label>
+                <textarea id="message" placeholder="Type your scheduled message..."></textarea>
+                <div class="error-message" id="messageError"></div>
+            </div>
+
+            <!-- Send Time (datetime-local) -->
+            <div class="input-group" id="timeGroup">
+                <label>⏰ Send Time (24h) <span class="required-star">*</span></label>
+                <input type="datetime-local" id="sendTime">
+                <div class="error-message" id="timeError"></div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span id="btnText">✈️ Schedule message</span>
+                <span id="loadingSpinner" style="display: none;"></span>
+            </button>
+            <div id="globalStatus" class="status-message" style="display: none;"></div>
+            <div class="note">⏱️ Time is sent as UTC (YYYY-MM-DD HH:mm:ss). Past dates disabled.</div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM elements
+        const form = document.getElementById('scheduleForm');
+        const phoneInput = document.getElementById('phone');
+        const messageInput = document.getElementById('message');
+        const sendTimeInput = document.getElementById('sendTime');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnTextSpan = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const globalStatusDiv = document.getElementById('globalStatus');
+
+        // Error containers
+        const phoneErrorDiv = document.getElementById('phoneError');
+        const messageErrorDiv = document.getElementById('messageError');
+        const timeErrorDiv = document.getElementById('timeError');
+
+        // Helper: clear all field-level errors & remove red borders
+        function clearFieldErrors() {
+            phoneErrorDiv.innerText = '';
+            messageErrorDiv.innerText = '';
+            timeErrorDiv.innerText = '';
+            phoneInput.classList.remove('error-border');
+            messageInput.classList.remove('error-border');
+            sendTimeInput.classList.remove('error-border');
+        }
+
+        // Helper: show global status (auto-hide after 6 sec but not interfering)
+        let statusTimeout = null;
+        function showGlobalMessage(message, type) {
+            if (statusTimeout) clearTimeout(statusTimeout);
+            globalStatusDiv.style.display = 'flex';
+            globalStatusDiv.innerHTML = '';
+            // add icon based on type
+            let iconHtml = '';
+            if (type === 'success') iconHtml = '✅ ';
+            else if (type === 'error') iconHtml = '⚠️ ';
+            else iconHtml = 'ℹ️ ';
+            globalStatusDiv.innerHTML = iconHtml + message;
+            globalStatusDiv.className = `status-message status-${type}`;
+            statusTimeout = setTimeout(() => {
+                if (globalStatusDiv) {
+                    globalStatusDiv.style.display = 'none';
+                }
+            }, 5500);
+        }
+
+        // Disable past datetime in datetime-local (no hour validation, just full date)
+        function setMinDateTime() {
+            const now = new Date();
+            // remove seconds/milliseconds offset to get local datetime-local min value
+            // datetime-local expects YYYY-MM-DDThh:mm (local time)
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const minLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+            sendTimeInput.setAttribute('min', minLocal);
+        }
+
+        // Convert datetime-local value (local) to UTC format: YYYY-MM-DD HH:mm:ss
+        function convertLocalToUTC(datetimeLocalValue) {
+            if (!datetimeLocalValue) return null;
+            // datetimeLocalValue format: "2025-04-20T14:30"
+            const [datePart, timePart] = datetimeLocalValue.split('T');
+            if (!datePart || !timePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            let [hours, minutes] = timePart.split(':').map(Number);
+            // create local date object (month is 0-index)
+            const localDate = new Date(year, month - 1, day, hours, minutes, 0);
+            if (isNaN(localDate.getTime())) return null;
+            // UTC string in required format: YYYY-MM-DD HH:mm:ss
+            const utcYear = localDate.getUTCFullYear();
+            const utcMonth = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+            const utcDay = String(localDate.getUTCDate()).padStart(2, '0');
+            const utcHours = String(localDate.getUTCHours()).padStart(2, '0');
+            const utcMinutes = String(localDate.getUTCMinutes()).padStart(2, '0');
+            const utcSeconds = String(localDate.getUTCSeconds()).padStart(2, '0');
+            return `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}:${utcSeconds}`;
+        }
+
+        // validation: returns object { isValid, errors }
+        function validateForm(phone, message, sendTimeRaw) {
+            let isValid = true;
+            const errors = { phone: '', message: '', time: '' };
+
+            // phone required & digits only
+            if (!phone || phone.trim() === '') {
+                errors.phone = 'Phone number is required.';
+                isValid = false;
+            } else if (!/^\d+$/.test(phone.trim())) {
+                errors.phone = 'Phone number must contain only digits (0-9).';
+                isValid = false;
+            } else {
+                // optional length recommendation, but only digits validation needed
+                if (phone.trim().length < 5) {
+                    // not a strict requirement but gives user feedback
+                    errors.phone = 'Enter a valid phone number (digits only).';
+                    isValid = false;
+                }
+            }
+
+            // message required
+            if (!message || message.trim() === '') {
+                errors.message = 'Message cannot be empty.';
+                isValid = false;
+            } else if (message.trim().length > 1000) {
+                errors.message = 'Message is too long (max 1000 characters).';
+                isValid = false;
+            }
+
+            // sendTime required & cannot be past (hour ignored but full datetime must be >= current local time)
+            if (!sendTimeRaw || sendTimeRaw === '') {
+                errors.time = 'Please select a send date & time.';
+                isValid = false;
+            } else {
+                // check past date/time (use local comparison)
+                const selectedLocalDate = new Date(sendTimeRaw);
+                if (isNaN(selectedLocalDate.getTime())) {
+                    errors.time = 'Invalid date/time format.';
+                    isValid = false;
+                }
+            }
+
+            return { isValid, errors };
+        }
+
+        // display field errors & highlight borders
+        function displayFieldErrors(errors) {
+            if (errors.phone) {
+                phoneErrorDiv.innerText = errors.phone;
+                phoneInput.classList.add('error-border');
+            } else {
+                phoneErrorDiv.innerText = '';
+                phoneInput.classList.remove('error-border');
+            }
+
+            if (errors.message) {
+                messageErrorDiv.innerText = errors.message;
+                messageInput.classList.add('error-border');
+            } else {
+                messageErrorDiv.innerText = '';
+                messageInput.classList.remove('error-border');
+            }
+
+            if (errors.time) {
+                timeErrorDiv.innerText = errors.time;
+                sendTimeInput.classList.add('error-border');
+            } else {
+                timeErrorDiv.innerText = '';
+                sendTimeInput.classList.remove('error-border');
+            }
+        }
+
+        // loading state management
+        function setLoading(isLoading) {
+            if (isLoading) {
+                submitBtn.disabled = true;
+                btnTextSpan.style.opacity = '0.8';
+                btnTextSpan.innerText = 'Scheduling';
+                loadingSpinner.style.display = 'inline-block';
+                loadingSpinner.innerHTML = '<div class="spinner"></div>';
+            } else {
+                submitBtn.disabled = false;
+                btnTextSpan.innerText = '✈️ Schedule message';
+                loadingSpinner.style.display = 'none';
+                loadingSpinner.innerHTML = '';
+                btnTextSpan.style.opacity = '1';
+            }
+        }
+
+        // main submit handler
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            // Clear previous global status and field errors
+            clearFieldErrors();
+            if (globalStatusDiv.style.display !== 'none') {
+                globalStatusDiv.style.display = 'none';
+                if (statusTimeout) clearTimeout(statusTimeout);
+            }
+
+            // get raw values
+            const phoneRaw = phoneInput.value;
+            const messageRaw = messageInput.value;
+            const sendTimeRaw = sendTimeInput.value;
+
+            // Validate
+            const { isValid, errors } = validateForm(phoneRaw, messageRaw, sendTimeRaw);
+            if (!isValid) {
+                displayFieldErrors(errors);
+                // also show a summary toast
+                let firstError = errors.phone || errors.message || errors.time;
+                showGlobalMessage(firstError || 'Please fix the errors above.', 'error');
+                return;
+            }
+
+            // convert send_time to UTC format: YYYY-MM-DD HH:mm:ss
+            let utcFormattedTime;
+            try {
+                utcFormattedTime = convertLocalToUTC(sendTimeRaw);
+                if (!utcFormattedTime) {
+                    throw new Error('UTC conversion failed');
+                }
+            } catch (convErr) {
+                showGlobalMessage('Date conversion error, please pick a valid datetime.', 'error');
+                sendTimeInput.classList.add('error-border');
+                timeErrorDiv.innerText = 'Invalid time conversion to UTC.';
+                return;
+            }
+
+            // Prepare payload
+            const payload = {
+                number: phoneRaw.trim(),
+                message: messageRaw.trim(),
+                send_time: utcFormattedTime
+            };
+
+            // Send POST request to localhost:3001/send-message/scheduled
+            setLoading(true);
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+                const response = await fetch('/send-message/scheduled', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                let responseData = {};
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                } else {
+                    const textResp = await response.text();
+                    responseData = { message: textResp || 'Response received' };
+                }
+
+                if (response.ok) {
+                    showGlobalMessage('✅ Message scheduled successfully!', 'success');
+                    // optionally reset form? according to requirement just success message
+                    // we keep the fields but user can schedule another. Clear errors
+                    clearFieldErrors();
+                    // optional: do not reset fields to let user adjust easily
+                } else {
+                    const errorMsg = responseData.message || responseData.error || `Server responded with status ${response.status}`;
+                    showGlobalMessage(`❌ Scheduling failed: ${errorMsg}`, 'error');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                let friendlyMsg = 'Network error: Could not reach server.';
+                if (error.name === 'AbortError') {
+                    friendlyMsg = 'Request timed out. Please check if server is running.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    friendlyMsg = 'Cannot connect to server. Make sure backend is running on http://localhost:3001';
+                } else {
+                    friendlyMsg = `Error: ${error.message}`;
+                }
+                showGlobalMessage(friendlyMsg, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Live: Remove specific error border on input for better UX
+        function removeErrorOnInput() {
+            phoneInput.addEventListener('input', () => {
+                phoneInput.classList.remove('error-border');
+                phoneErrorDiv.innerText = '';
+            });
+            messageInput.addEventListener('input', () => {
+                messageInput.classList.remove('error-border');
+                messageErrorDiv.innerText = '';
+            });
+            sendTimeInput.addEventListener('change', () => {
+                sendTimeInput.classList.remove('error-border');
+                timeErrorDiv.innerText = '';
+            });
+        }
+
+        // Set min datetime attribute on page load and re-run every minute?
+        function initializeDateTimeMin() {
+            setMinDateTime();
+            // Optional: refresh min each 60 sec to keep disabled past selection when page stays open
+            setInterval(() => {
+                if (document.hasFocus() && sendTimeInput && !sendTimeInput.disabled) {
+                    setMinDateTime();
+                    // also if user already selected a value that becomes past, show warning but not block submission (will be caught by validation)
+                    if (sendTimeInput.value) {
+                        const selectedVal = sendTimeInput.value;
+                        const selectedDate = new Date(selectedVal);
+                        if (!isNaN(selectedDate.getTime()) && selectedDate <= new Date()) {
+                            if (!timeErrorDiv.innerText.includes('past')) {
+                                timeErrorDiv.innerText = 'Selected time is now in the past. Update time.';
+                                sendTimeInput.classList.add('error-border');
+                            }
+                        } else {
+                            if (timeErrorDiv.innerText.includes('past')) {
+                                timeErrorDiv.innerText = '';
+                                sendTimeInput.classList.remove('error-border');
+                            }
+                        }
+                    }
+                }
+            }, 30000);
+        }
+
+        // attach event
+        form.addEventListener('submit', handleSubmit);
+        removeErrorOnInput();
+        initializeDateTimeMin();
+
+        // small tweak: default placeholder for datetime-local shows nothing, but user can tap
+        // make sure that initial empty validation works
+        // additionally, handle if user clicks submit with empty time field
+        // set initial borders clean
+        clearFieldErrors();
+        // also set some default example? not needed, keep blank
+        // Ensure phone input only digits with key filtering optional but not mandatory because validation catches
+        phoneInput.addEventListener('keypress', (e) => {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char) && e.which !== 8 && e.which !== 0) {
+                e.preventDefault();
+            }
+        });
+        // paste sanitization: remove non-digits
+        phoneInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            const digitsOnly = pasted.replace(/\D/g, '');
+            phoneInput.value = digitsOnly;
+        });
+    })();
+</script>
+</body>
+</html>
