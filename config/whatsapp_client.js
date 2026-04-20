@@ -3,7 +3,12 @@ const qrcode = require('qrcode-terminal');
 
 const logger = require('../config/logger');
 
-const client = new Client();
+const client = new Client({
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
+});
+
 let isWhatsappReady = false;
 
 client.on('qr', (qr) => {

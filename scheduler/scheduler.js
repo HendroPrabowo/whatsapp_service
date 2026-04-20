@@ -11,15 +11,14 @@ cron.schedule('* * * * *', async () => {
         logger.info('whatsapp client still not ready');
         return;
     }
-    logger.info('checking scheduled messages...');
+    const now = new Date();
 
     try {
-        const now = new Date();
         const messages = await MessageQueue.findAll({
             where: {
                 is_sent: false,
                 send_time: {
-                    [Op.lte]: new Date()
+                    [Op.lte]: now
                 }
             }
         });
